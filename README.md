@@ -114,15 +114,58 @@ The bot requires the following permissions:
 - Embed Links
 - Attach Files
 - Use Slash Commands
+- Add Reactions
 
-## Hosting
+## Running the Bot
 
-For 24/7 operation, consider hosting on:
+### Local Development
 
-- [Heroku](https://heroku.com)
-- [Railway](https://railway.app)
-- [Replit](https://replit.com)
-- A VPS or dedicated server
+When you run the bot locally using `python discord-media-bot.py`, it runs on your machine. To keep it running in the background:
+
+```bash
+# Start in background
+nohup python3 discord-media-bot.py > bot.log 2>&1 &
+
+# Check if running
+ps aux | grep discord-media-bot
+
+# View logs
+tail -f bot.log
+
+# Stop the bot
+pkill -f "discord-media-bot.py"
+```
+
+**Important:** The bot only runs while your computer is on and connected to the internet. It will stop if you:
+- Shut down or restart your computer
+- Log out of your user account
+- Put your computer to sleep
+- Lose internet connection
+
+### Production Hosting
+
+For 24/7 operation without keeping your computer running, consider these hosting options:
+
+#### Free Options
+- **[Railway](https://railway.app)** - Easy deployment with GitHub integration
+- **[Fly.io](https://fly.io)** - Free tier available with good uptime
+- **[Render](https://render.com)** - Auto-deploys from GitHub
+
+#### Paid Options
+- **[Heroku](https://heroku.com)** - $5-7/month for always-on dyno
+- **VPS Providers** - DigitalOcean, Linode, Vultr (~$5/month)
+- **[AWS EC2](https://aws.amazon.com/ec2/)** - Free tier for 12 months
+- **Raspberry Pi** - One-time cost (~$35-80) for home hosting
+
+#### Quick Deploy to Railway
+
+1. Fork this repository
+2. Sign up for [Railway](https://railway.app)
+3. Create new project → Deploy from GitHub repo
+4. Add environment variable: `DISCORD_TOKEN`
+5. Deploy!
+
+The bot will automatically restart if it crashes and run 24/7.
 
 ## License
 
