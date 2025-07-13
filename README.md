@@ -7,6 +7,9 @@ A Discord bot that automatically collects media (images, videos, GIFs) from moni
 - **Media Filtering**: Automatically detects and copies media content (images, videos, GIFs)
 - **Channel Monitoring**: Monitor specific channels or all channels in your server
 - **Slash Commands**: Full support for Discord's slash command interface
+- **Embed Support**: Properly handles embedded media from URLs including Twitter/X posts
+- **Duplicate Prevention**: Advanced tracking ensures each piece of media is only copied once
+- **Smart Delays**: Waits for embeds to fully load before processing (especially for Twitter/X)
 - **Customization**: Toggle author attribution and other settings
 - **Simple Setup**: Easy-to-use commands for configuration
 
@@ -77,6 +80,8 @@ A Discord bot that automatically collects media (images, videos, GIFs) from moni
 3. Use `/monitor add #channel` to start monitoring a channel
 4. Media will automatically be copied to your designated media channel
 
+**Note**: You only need to invite the bot once. Updates to the bot are automatically available without re-invitation, as long as the bot has the necessary permissions.
+
 ## Configuration
 
 The bot stores its configuration in a `bot_config.json` file with the following structure:
@@ -121,10 +126,22 @@ For 24/7 operation, consider hosting on:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## Recent Updates
+
+- **Fixed duplicate posting issue**: Implemented advanced message tracking to ensure each piece of media is only copied once
+- **Improved Twitter/X embed detection**: Added smart delay system that waits longer for Twitter/X embeds to fully load
+- **Enhanced queue management**: Better handling of message processing to prevent race conditions
+
+## Troubleshooting
+
+- **Bot posts duplicates**: Make sure you're running only one instance of the bot. Kill all instances with `pkill -f "discord-media-bot.py"` and restart
+- **Twitter/X embeds not detected**: The bot now waits 8 seconds for Twitter/X embeds to load (vs 3 seconds for other media)
+- **Bot not responding**: Check that the bot has proper permissions in both source and destination channels
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Credits
 
-Created by [Your Name] - 2025
+Created by Malachi Mindwyre - 2025
