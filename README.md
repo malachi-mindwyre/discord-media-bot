@@ -10,6 +10,8 @@ A Discord bot that automatically collects media (images, videos, GIFs) from moni
 - **Embed Support**: Properly handles embedded media from URLs including Twitter/X posts
 - **Duplicate Prevention**: Advanced tracking ensures each piece of media is only copied once
 - **Smart Delays**: Waits for embeds to fully load before processing (especially for Twitter/X)
+- **Visual Feedback**: Adds 📸 reaction to copied messages
+- **Consistent Display**: Media always appears before source information
 - **Customization**: Toggle author attribution and other settings
 - **Simple Setup**: Easy-to-use commands for configuration
 
@@ -131,6 +133,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Fixed duplicate posting issue**: Implemented advanced message tracking to ensure each piece of media is only copied once
 - **Improved Twitter/X embed detection**: Added smart delay system that waits longer for Twitter/X embeds to fully load
 - **Enhanced queue management**: Better handling of message processing to prevent race conditions
+- **Camera reaction**: Bot now adds a 📸 emoji reaction to all copied media messages
+- **Consistent media ordering**: Media content now always appears before the source information for better visual consistency
 
 ## Troubleshooting
 
