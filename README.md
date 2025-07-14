@@ -109,11 +109,29 @@ The bot stores its configuration in a `bot_config.json` file with the following 
 
 The bot requires the following permissions:
 
-- Read Messages/View Channels
-- Send Messages
-- Embed Links
-- Attach Files
-- Use Slash Commands
+- **Read Messages/View Channels** - To see messages in monitored channels
+- **Send Messages** - To post copied media to the destination channel
+- **Embed Links** - To create info embeds with source details
+- **Attach Files** - To upload/copy media files
+- **Use Slash Commands** - For setup and monitoring commands
+
+### Setting Up Permissions
+
+When inviting the bot to your server:
+
+1. **Go to Discord Developer Portal** → Your Application → OAuth2 → URL Generator
+2. **Select Scopes**: `bot` and `applications.commands`
+3. **Select Bot Permissions** (listed above)
+4. **Use the generated invite URL**
+
+**Quick Permission Integer**: `2147485696`
+
+**Invite URL Format**:
+```
+https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_CLIENT_ID&permissions=2147485696&scope=bot%20applications.commands
+```
+
+Replace `YOUR_BOT_CLIENT_ID` with your bot's Client ID from the Developer Portal.
 
 ## Running the Bot
 
@@ -177,6 +195,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Enhanced queue management**: Better handling of message processing to prevent race conditions
 - **Consistent media ordering**: Media content now always appears before the source information for better visual consistency
 - **Clean display**: No emoji reactions - bot only copies media with source information
+- **Token regeneration fix**: Resolved reaction issues by regenerating bot token to ensure clean behavior
 
 ## Troubleshooting
 
@@ -184,6 +203,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Twitter/X embeds not detected**: The bot now waits 8 seconds for Twitter/X embeds to load (vs 3 seconds for other media)
 - **Bot not responding**: Check that the bot has proper permissions in both source and destination channels
 - **Seeing emoji reactions**: The MediaMover bot does NOT add any reactions. Check for other bots or server auto-react features
+- **Bot still adding reactions**: Regenerate your bot token in Discord Developer Portal - old tokens may have cached reaction behavior
 
 ## Contributing
 
