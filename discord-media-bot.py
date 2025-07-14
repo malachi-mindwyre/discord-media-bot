@@ -448,16 +448,10 @@ class MediaCopyBot(commands.Bot):
             embeds_to_send.append(embed)
             
             # Send the copied message
-            sent_message = await media_channel.send(
+            await media_channel.send(
                 files=files,
                 embeds=embeds_to_send
             )
-            
-            # Add camera reaction
-            try:
-                await sent_message.add_reaction("📸")
-            except Exception as e:
-                logger.debug(f"Could not add reaction: {e}")
             
             logger.info(f"Copied media from #{message.channel.name} to #{media_channel.name}")
             
