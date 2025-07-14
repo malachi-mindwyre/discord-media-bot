@@ -11,6 +11,7 @@ A Discord bot that automatically collects media (images, videos, GIFs) from moni
 - **Duplicate Prevention**: Advanced tracking ensures each piece of media is only copied once
 - **Smart Delays**: Waits for embeds to fully load before processing (especially for Twitter/X)
 - **Consistent Display**: Media always appears before source information
+- **No Reactions**: Bot does not add any emoji reactions to messages
 - **Customization**: Toggle author attribution and other settings
 - **Simple Setup**: Easy-to-use commands for configuration
 
@@ -175,13 +176,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Improved Twitter/X embed detection**: Added smart delay system that waits longer for Twitter/X embeds to fully load
 - **Enhanced queue management**: Better handling of message processing to prevent race conditions
 - **Consistent media ordering**: Media content now always appears before the source information for better visual consistency
-- **Clean display**: Removed emoji reactions for cleaner media presentation
+- **Clean display**: No emoji reactions - bot only copies media with source information
 
 ## Troubleshooting
 
 - **Bot posts duplicates**: Make sure you're running only one instance of the bot. Kill all instances with `pkill -f "discord-media-bot.py"` and restart
 - **Twitter/X embeds not detected**: The bot now waits 8 seconds for Twitter/X embeds to load (vs 3 seconds for other media)
 - **Bot not responding**: Check that the bot has proper permissions in both source and destination channels
+- **Seeing emoji reactions**: The MediaMover bot does NOT add any reactions. Check for other bots or server auto-react features
 
 ## Contributing
 
