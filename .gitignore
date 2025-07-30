@@ -91,6 +91,11 @@ cython_debug/
 # Logs
 *.log
 logs/
+bot.log
+discord_bot.log
+
+# Configuration
+bot_config.json
 
 # Media files (project specific)
 media/
