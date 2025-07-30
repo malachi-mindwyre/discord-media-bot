@@ -61,7 +61,15 @@ class MediaCopyBot(commands.Bot):
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, 'r') as f:
-                    return json.load(f)
+                    config = json.load(f)
+                    
+                # Migration: Add excluded_channels if missing
+                if "excluded_channels" not in config:
+                    config["excluded_channels"] = {}
+                    logger.info("Added excluded_channels to existing config")
+                    self.save_config(config)
+                    
+                return config
             except json.JSONDecodeError:
                 logger.error("Invalid JSON in config file, creating new config")
         
@@ -70,7 +78,8 @@ class MediaCopyBot(commands.Bot):
             "monitored_channels": {},  # guild_id: [channel_ids]
             "media_channels": {},      # guild_id: channel_id
             "include_author": {},      # guild_id: boolean
-            "monitor_all": {}          # guild_id: boolean
+            "monitor_all": {},         # guild_id: boolean
+            "excluded_channels": {}    # guild_id: [channel_ids] - excluded when monitor_all is True
         }
         
         self.save_config(default_config)
@@ -122,6 +131,8 @@ class MediaCopyBot(commands.Bot):
                 self.config["include_author"][guild_id] = True
             if guild_id not in self.config["monitor_all"]:
                 self.config["monitor_all"][guild_id] = False
+            if guild_id not in self.config["excluded_channels"]:
+                self.config["excluded_channels"][guild_id] = []
         
         self.save_config()
         
@@ -307,8 +318,10 @@ class MediaCopyBot(commands.Bot):
             
         # Check monitoring mode
         if self.config["monitor_all"].get(guild_id, False):
-            # Monitor all channels except media channel
-            pass
+            # Monitor all channels except media channel and excluded channels
+            excluded_channels = self.config["excluded_channels"].get(guild_id, [])
+            if message.channel.id in excluded_channels:
+                return False
         else:
             # Check if channel is in monitored list
             if message.channel.id not in self.config["monitored_channels"][guild_id]:
@@ -541,6 +554,57 @@ async def monitor_remove(ctx, channel: discord.TextChannel):
     
     await ctx.send(embed=embed)
 
+@monitor_group.command(name="exclude", description="Exclude a channel from monitoring when monitor_all is enabled")
+async def monitor_exclude(ctx, channel: discord.TextChannel):
+    """Exclude a channel from monitoring when monitor_all is enabled"""
+    guild_id = str(ctx.guild.id)
+    
+    if guild_id not in bot.config["excluded_channels"]:
+        bot.config["excluded_channels"][guild_id] = []
+    
+    if channel.id not in bot.config["excluded_channels"][guild_id]:
+        bot.config["excluded_channels"][guild_id].append(channel.id)
+        bot.save_config()
+        
+        embed = discord.Embed(
+            title="✅ Channel Excluded",
+            description=f"Excluded {channel.mention} from monitoring (when monitor_all is enabled)",
+            color=0x00ff00
+        )
+    else:
+        embed = discord.Embed(
+            title="ℹ️ Already Excluded",
+            description=f"Already excluding {channel.mention}",
+            color=0xffff00
+        )
+    
+    await ctx.send(embed=embed)
+
+@monitor_group.command(name="include", description="Remove a channel from the exclusion list")
+async def monitor_include(ctx, channel: discord.TextChannel):
+    """Remove a channel from the exclusion list"""
+    guild_id = str(ctx.guild.id)
+    
+    if (guild_id in bot.config["excluded_channels"] and 
+        channel.id in bot.config["excluded_channels"][guild_id]):
+        
+        bot.config["excluded_channels"][guild_id].remove(channel.id)
+        bot.save_config()
+        
+        embed = discord.Embed(
+            title="✅ Channel Included",
+            description=f"Removed {channel.mention} from exclusion list",
+            color=0x00ff00
+        )
+    else:
+        embed = discord.Embed(
+            title="ℹ️ Not Excluded",
+            description=f"Was not excluding {channel.mention}",
+            color=0xffff00
+        )
+    
+    await ctx.send(embed=embed)
+
 @monitor_group.command(name="all", description="Toggle monitoring all channels")
 async def monitor_all(ctx, enabled: bool = None):
     """Toggle monitoring all channels except media channel"""
@@ -556,7 +620,11 @@ async def monitor_all(ctx, enabled: bool = None):
     if enabled:
         bot.config["monitored_channels"][guild_id] = []
         bot.save_config()
-        status = "🌐 Now monitoring **all channels** (except destination)"
+        excluded_count = len(bot.config["excluded_channels"].get(guild_id, []))
+        if excluded_count > 0:
+            status = f"🌐 Now monitoring **all channels** (except destination + {excluded_count} excluded)"
+        else:
+            status = "🌐 Now monitoring **all channels** (except destination)"
     else:
         status = "📍 Switched to monitoring **specific channels only**"
     
@@ -666,6 +734,8 @@ async def help_command(ctx):
             "`/monitor add #channel` - Add a channel to monitor\n"
             "`/monitor remove #channel` - Stop monitoring a channel\n"
             "`/monitor all` - Toggle monitoring all channels\n"
+            "`/monitor exclude #channel` - Exclude channel from monitor_all\n"
+            "`/monitor include #channel` - Remove channel from exclusions\n"
             "`/monitor list` - Show current configuration"
         ),
         inline=False

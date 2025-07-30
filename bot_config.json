@@ -21,5 +21,6 @@
     "monitor_all": {
         "1375187561139405011": false,
         "1365017718721613854": true
-    }
+    },
+    "excluded_channels": {}
 }

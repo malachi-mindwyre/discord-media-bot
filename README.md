@@ -5,7 +5,7 @@ A Discord bot that automatically collects media (images, videos, GIFs) from moni
 ## Features
 
 - **Media Filtering**: Automatically detects and copies media content (images, videos, GIFs)
-- **Channel Monitoring**: Monitor specific channels or all channels in your server
+- **Channel Monitoring**: Monitor specific channels or all channels with exclusion support
 - **Slash Commands**: Full support for Discord's slash command interface
 - **Embed Support**: Properly handles embedded media from URLs including Twitter/X posts
 - **Duplicate Prevention**: Advanced tracking ensures each piece of media is only copied once
@@ -21,6 +21,8 @@ A Discord bot that automatically collects media (images, videos, GIFs) from moni
 | `/monitor add [channel]` | Add a channel to the monitoring list |
 | `/monitor remove [channel]` | Remove a channel from monitoring |
 | `/monitor all [true/false]` | Toggle monitoring of all channels |
+| `/monitor exclude [channel]` | Exclude a channel from monitoring when monitor_all is enabled |
+| `/monitor include [channel]` | Remove a channel from the exclusion list |
 | `/monitor list` | Show current monitoring configuration |
 | `/toggle_author` | Toggle whether to include original author information |
 | `/help` | Show available commands and information |
@@ -107,6 +109,7 @@ The bot stores settings in `bot_config.json`:
   "monitored_channels": {"guild_id": [channel_ids]},
   "media_channels": {"guild_id": channel_id},
   "monitor_all": {"guild_id": boolean},
+  "excluded_channels": {"guild_id": [channel_ids]},
   "include_author": {"guild_id": boolean}
 }
 ```
@@ -124,9 +127,23 @@ Permission integer: `2147485696`
 
 ## Usage
 
+### Basic Setup
 1. **Setup**: `/setup #media-channel`
 2. **Monitor**: `/monitor add #source-channel`
 3. **Done!** Media from source channels will be copied to your media channel
+
+### Advanced Monitoring
+
+**Monitor All Channels:**
+- Use `/monitor all true` to monitor all channels in your server
+- Use `/monitor exclude #channel` to exclude specific channels from monitoring
+- Use `/monitor include #channel` to remove channels from exclusions
+- Perfect for servers with many channels where you only want to exclude a few
+
+**Monitor Specific Channels:**
+- Use `/monitor all false` to switch to specific channel mode
+- Use `/monitor add #channel` to add channels one by one
+- Better for servers where you only want to monitor a few channels
 
 ## Troubleshooting
 
