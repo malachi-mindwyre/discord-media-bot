@@ -83,6 +83,8 @@ pkill -f "discord-media-bot.py"
 #### DigitalOcean (Recommended)
 See [DEPLOYMENT_DIGITALOCEAN.md](DEPLOYMENT_DIGITALOCEAN.md) for detailed instructions.
 
+**Currently deployed at**: 144.126.215.207
+
 Quick deployment:
 ```bash
 # On your DigitalOcean droplet
@@ -137,11 +139,11 @@ Permission integer: `2147485696`
 
 ## Dependencies
 
-- `discord.py==2.3.2` - Discord API wrapper
-- `python-dotenv==1.0.0` - Environment variables
-- `aiohttp==3.9.1` - Async HTTP client
-- `pillow==10.1.0` - Image processing
-- `yt-dlp==2023.12.30` - Video/media extraction
+- `discord.py==2.5.2` - Discord API wrapper
+- `python-dotenv==1.1.1` - Environment variables
+- `aiohttp==3.12.15` - Async HTTP client
+- `pillow==11.3.0` - Image processing
+- `yt-dlp==2024.12.6` - Video/media extraction
 - `pydub==0.25.1` - Audio processing
 
 ## Contributing
