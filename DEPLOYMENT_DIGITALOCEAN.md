@@ -35,8 +35,8 @@ chmod 600 /home/botuser/discord-media-bot/.env
 chown botuser:botuser /home/botuser/discord-media-bot/.env
 
 # Start the bot
-systemctl start discord-bot
-systemctl status discord-bot
+/home/botuser/manage_bots.sh start
+/home/botuser/manage_bots.sh status
 ```
 
 #### Option B: Manual Setup
@@ -57,30 +57,42 @@ source venv/bin/activate
 pip install -r requirements.txt
 exit
 
-# Create systemd service (as root)
-cat > /etc/systemd/system/discord-bot.service << 'EOF'
-[Unit]
-Description=Discord Media Bot
-After=network.target
+# Install screen (as root)
+apt install -y screen
 
-[Service]
-Type=simple
-User=botuser
-WorkingDirectory=/home/botuser/discord-media-bot
-Environment="PATH=/home/botuser/discord-media-bot/venv/bin"
-Environment="PYTHONUNBUFFERED=1"
-ExecStart=/home/botuser/discord-media-bot/venv/bin/python /home/botuser/discord-media-bot/discord-media-bot.py
-Restart=always
-RestartSec=10
+# Create management script
+cat > /home/botuser/manage_bots.sh << 'EOF'
+#!/bin/bash
 
-[Install]
-WantedBy=multi-user.target
+case $1 in
+  start)
+    echo "Starting Discord bot in screen session..."
+    cd /home/botuser/discord-media-bot
+    screen -dmS media_bot bash -c 'source venv/bin/activate && python discord-media-bot.py'
+    echo "Bot started! Use 'screen -r media_bot' to attach to session."
+    ;;
+  stop)
+    echo "Stopping Discord bot..."
+    screen -X -S media_bot quit 2>/dev/null
+    echo "Bot stopped."
+    ;;
+  status)
+    echo "Screen sessions:"
+    screen -ls
+    echo -e "\nRunning processes:"
+    ps aux | grep -E 'discord-media-bot.py' | grep -v grep
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|status}"
+    ;;
+esac
 EOF
 
-# Enable and start
-systemctl daemon-reload
-systemctl enable discord-bot
-systemctl start discord-bot
+chmod +x /home/botuser/manage_bots.sh
+chown botuser:botuser /home/botuser/manage_bots.sh
+
+# Start the bot
+/home/botuser/manage_bots.sh start
 ```
 
 ### Step 3: Transfer Configuration (Optional)
@@ -88,23 +100,28 @@ To preserve your existing bot settings from your local machine:
 ```bash
 # From your local machine
 scp bot_config.json root@YOUR_DROPLET_IP:/home/botuser/discord-media-bot/
-ssh root@YOUR_DROPLET_IP "chown botuser:botuser /home/botuser/discord-media-bot/bot_config.json && systemctl restart discord-bot"
+ssh root@YOUR_DROPLET_IP "chown botuser:botuser /home/botuser/discord-media-bot/bot_config.json && /home/botuser/manage_bots.sh stop && /home/botuser/manage_bots.sh start"
 ```
 
 ## Management Commands
 
 ### Bot Control
 ```bash
-systemctl status discord-bot   # Check status
-systemctl restart discord-bot  # Restart bot
-systemctl stop discord-bot     # Stop bot
-systemctl start discord-bot    # Start bot
+/home/botuser/manage_bots.sh status  # Check status
+/home/botuser/manage_bots.sh stop    # Stop bot
+/home/botuser/manage_bots.sh start   # Start bot
 ```
 
 ### View Logs
 ```bash
-journalctl -u discord-bot -f   # Live logs
-journalctl -u discord-bot -n 100  # Last 100 lines
+# Attach to bot screen session
+screen -r media_bot
+
+# Detach from screen (bot keeps running)
+# Press Ctrl+A then D
+
+# List all screen sessions
+screen -ls
 ```
 
 ### Update Bot
@@ -116,17 +133,19 @@ git pull
 source venv/bin/activate
 pip install -r requirements.txt
 exit
-systemctl restart discord-bot
+/home/botuser/manage_bots.sh stop
+/home/botuser/manage_bots.sh start
 ```
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| Bot not starting | Check logs: `journalctl -u discord-bot -n 100` |
+| Bot not starting | Attach to screen: `screen -r media_bot` and check errors |
 | Permission errors | Fix ownership: `chown -R botuser:botuser /home/botuser/discord-media-bot` |
 | Bot offline | Verify Discord token in `.env` file |
 | Can't connect via SSH | Ensure SSH key is added to droplet or use password auth |
+| Screen session dead | Run `/home/botuser/manage_bots.sh start` to restart |
 
 ## Security
 

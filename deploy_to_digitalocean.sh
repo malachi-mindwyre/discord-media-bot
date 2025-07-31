@@ -65,36 +65,50 @@ pip install -r requirements.txt
 echo "Bot code setup complete!"
 EOF
 
-# Step 5: Create systemd service
-echo "Step 5: Creating systemd service..."
-cat > /etc/systemd/system/discord-bot.service << 'SERVICE'
-[Unit]
-Description=Discord Media Bot
-After=network.target
+# Step 5: Install screen
+echo "Step 5: Installing screen..."
+wait_for_apt
+apt install -y screen
 
-[Service]
-Type=simple
-User=botuser
-WorkingDirectory=/home/botuser/discord-media-bot
-Environment="PATH=/home/botuser/discord-media-bot/venv/bin"
-Environment="PYTHONUNBUFFERED=1"
-ExecStart=/home/botuser/discord-media-bot/venv/bin/python /home/botuser/discord-media-bot/discord-media-bot.py
-Restart=always
-RestartSec=10
+# Step 6: Create bot management script
+echo "Step 6: Creating bot management script..."
+cat > /home/botuser/manage_bots.sh << 'SCRIPT'
+#!/bin/bash
 
-[Install]
-WantedBy=multi-user.target
-SERVICE
+case $1 in
+  start)
+    echo "Starting Discord bot in screen session..."
+    cd /home/botuser/discord-media-bot
+    screen -dmS media_bot bash -c 'source venv/bin/activate && python discord-media-bot.py'
+    echo "Bot started! Use 'screen -r media_bot' to attach to session."
+    ;;
+  stop)
+    echo "Stopping Discord bot..."
+    screen -X -S media_bot quit 2>/dev/null
+    echo "Bot stopped."
+    ;;
+  status)
+    echo "Screen sessions:"
+    screen -ls
+    echo -e "\nRunning processes:"
+    ps aux | grep -E 'discord-media-bot.py' | grep -v grep
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|status}"
+    echo "  start  - Start bot in screen session"
+    echo "  stop   - Stop bot"
+    echo "  status - Show running session and process"
+    ;;
+esac
+SCRIPT
 
-# Step 6: Set up firewall
-echo "Step 6: Setting up firewall..."
+chmod +x /home/botuser/manage_bots.sh
+chown botuser:botuser /home/botuser/manage_bots.sh
+
+# Step 7: Set up firewall
+echo "Step 7: Setting up firewall..."
 ufw allow OpenSSH
 echo "y" | ufw enable
-
-# Step 7: Enable service
-echo "Step 7: Enabling bot service..."
-systemctl daemon-reload
-systemctl enable discord-bot
 
 echo ""
 echo "=== DEPLOYMENT ALMOST COMPLETE ==="
@@ -107,10 +121,13 @@ echo "   chmod 600 /home/botuser/discord-media-bot/.env"
 echo "   chown botuser:botuser /home/botuser/discord-media-bot/.env"
 echo ""
 echo "2. Start the bot:"
-echo "   systemctl start discord-bot"
-echo "   systemctl status discord-bot"
+echo "   /home/botuser/manage_bots.sh start"
 echo ""
-echo "3. View logs:"
-echo "   journalctl -u discord-bot -f"
+echo "3. Check status:"
+echo "   /home/botuser/manage_bots.sh status"
+echo ""
+echo "4. View logs (attach to screen):"
+echo "   screen -r media_bot"
+echo "   (Press Ctrl+A then D to detach)"
 echo ""
 echo "Optional: Copy your bot_config.json to preserve settings"
